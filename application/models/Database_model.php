@@ -10,67 +10,45 @@ class Database_model extends CI_Model {
         $this->load->database();
     }
     
-    public function getClient($companyId)
+    /**
+     * Returns School Data (array) when personid is passed
+     * @access public
+     * @param $pid int
+     * @return array
+     */
+    public function lookupClient($pid)
     {
-        $query = $this->db->get_where('clients', array('helpdesk_id'=>$companyId));
+        $query = $this->db->get_where('clients', array('clockwork_id'=>$pid));
         
         return $query->row();
     }
     
-    public function findTicket($ticket)
+    /**
+     * Returns Comment Data (array) when commentid is passed
+     * @access public
+     * @param $commentid int
+     * @return array
+     */
+    public function lookupComment($commentid)
     {
-        $query = $this->db->get_where('tickets', array('ticket_id'=>$ticket));
-        
-        if($query->row())
-        {
-            return $query->row();
-        } else {
-            return false;
-        }
+        $query = $this->db->get_where('comments', array('commentid'=>$commentid));
+        return $query->row();
     }
     
-    public function addTicket($ticketID,$expired)
+    /**
+     * Adds comment to database
+     * @access public
+     * @param array $comment
+     * @return void
+     */
+    public function insertComment($comment)
     {
-        $this->db->insert('tickets', array('ticket_id'=>$ticketID,'expired'=>$expired));
+        $data = array(
+            "CommentID" => $comment->CommentID,
+            "IssueID" => $comment->IssueID
+        );
         
-    }
-    
-    public function lookupClient($pid)
-    {
-        
-        
-        $query = $this->db->get_where('clients', array('clockwork_id'=>$pid));
-        
-        $result = $query->result();
-        
-        $template = new stdClass();
-        
-        $template->name = $pid;
-        
-        if($result == null)
-        {
-            $data = array($template);
-        } else {
-            $data = $query->result();
-        }
-        
-        return $data;
-
-    }
-    
-    public function isHidden($pid)
-    {
-        $query = $this->db->get_where('clients', array('clockwork_id'=>$pid));
-        
-        $result = $query->row();
-        
-        if($result->hide)
-        {
-            return true;
-        } else {
-            return false;
-        }
-        
+        $this->db->insert('comments', $data);
     }
     
 }

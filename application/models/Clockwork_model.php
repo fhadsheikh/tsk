@@ -2,32 +2,73 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+/**
+ * ClockWork Model
+ * Connect to TechnoPro's ClockWork MSSQL Database
+ */
+
 class Clockwork_model extends CI_Model {
 
+    /**
+     * Will store the connection string to connect to MSSQL
+     *
+     * @var string
+     */
     private $conn;
     
-    public function __construct(){
+    /**
+     * Constructor for ClockWork Model
+     * Build Connection String and store it in $this->conn
+     *
+     * @access public
+     * @param string $config - Configuration filename minus the file extension
+     * e.g: 'tsk' will load config/tsk.php
+     * @return void
+     */
+    public function __construct($config = 'tsk')
+    {
+        parent::__construct();
         
-        $serverName = "stableclockwork, 1434";
+        // Load the tsk.php configuration file
+        $this->load->config($config);
         
+        /***************************
+         * Build Connection String *
+         ***************************/
+        
+        /**
+         * Contains Database Settings from Config file
+         * @var array
+         */
+        $databaseSettings = $this->config->item('tsk_database');
+        
+        /**
+         * Contains servername and port seperated by a comma
+         * @var string
+         */
+        $serverName = $databaseSettings['ServerName'].', '.$databaseSettings['Port'];
+        
+        /**
+         * Contains Connection Information
+         * @var array
+         */
         $connectionInfo = array(
-            "Database" => "ClockWorkTechno",
-            "UID" => "tp",
-            "PWD" => "techno03"
+            "Database" => $databaseSettings['Database'],
+            "UID" => $databaseSettings['UID'],
+            "PWD" => $databaseSettings['PWD']
         );
         
+        /**
+         * Store sql connect funtion to private $conn var
+         * Other functions can pass $conn along with sql queries to get results
+         */
         $this->conn = sqlsrv_connect($serverName, $connectionInfo);
-        
-        
     }
     
     /*
-     * getExpiryDates()
-     * ----------------
-     * returns Array
-     * Array of two sets of clients. Expired Support and Expiring Soon. 
-     * Array provides the personid and formatted date of support expiry
-     *
+     * @access public
+     * @return array - Two sets of clients; 'expired' and 'expiring' with their
+     * personids and expiry date timestamps
      */
     public function getExpiryDates()
     {
@@ -46,7 +87,8 @@ class Clockwork_model extends CI_Model {
         // var $today timestamp. Any expiry date before this date is expired
         $today = strtotime(date('Y-m-d'));
         // var $future timestamp. Any expiry between $today and $future is expiring soon
-        $future = strtotime('+1 month');
+        $expiringSoonMonths = $this->config->item('expiringSoonMonths');
+        $future = strtotime('+'.$expiringSoonMonths.' month');
         // var $i & $ii, incrementals to set as array keys. For JSON.
         $i = 0;
         $ii = 0;
@@ -57,16 +99,15 @@ class Clockwork_model extends CI_Model {
             if($client['expirydate']->getTimestamp() < $today)
             {
                 $schools['expired'][$i]['personid'] = $client['personid'];
-                $schools['expired'][$i]['date'] = date('F j, Y', $client['expirydate']->getTimestamp());
+                $schools['expired'][$i]['date'] = $client['expirydate']->getTimestamp();
                 $i++;
             } else if ($client['expirydate']->getTimestamp() > $today && $client['expirydate']->getTimestamp() < $future){
                 $schools['expiring'][$ii]['personid'] = $client['personid'];
-                $schools['expiring'][$ii]['date'] = date('F j, Y', $client['expirydate']->getTimestamp());
+                $schools['expiring'][$ii]['date'] = $client['expirydate']->getTimestamp();
                 $ii++;
             }
         }
         return $schools;
     }
-    
     
 }
