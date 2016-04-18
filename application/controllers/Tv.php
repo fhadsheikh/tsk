@@ -18,7 +18,7 @@ class Tv extends REST_Controller {
         $this->load->model('Clockwork_model');
         $this->load->model('Database_model');
         $this->load->model('Helpdesk_model');
-        
+        $this->load->helper('My_date_helper');
         
        header("Access-Control-Allow-Origin: *");
         
@@ -103,7 +103,7 @@ class Tv extends REST_Controller {
             if(!$school->hide){
                 
                 $expiredClients[$key]['name'] = $school->name;
-                $expiredClients[$key]['date'] = date('F j, Y', $expired['date']);
+                $expiredClients[$key]['date'] = date('F j, Y H:i:s', $expired['date']);
             }
         }
         
@@ -134,7 +134,7 @@ class Tv extends REST_Controller {
         $this->response($data, 200);
         
     }
-    
+   
     /**
      * API ENDPOINT - GET /tv/comments
      * @access public
@@ -143,6 +143,8 @@ class Tv extends REST_Controller {
      */
     public function comments_get()
     {
+        
+        $this->load->library('Prepare');
         $latestTicket = $this->Helpdesk_model->getTickets2(1);
         
         $latestComment = $this->Helpdesk_model->getComments($latestTicket[0]->IssueID)[0];
@@ -152,56 +154,17 @@ class Tv extends REST_Controller {
         if(!$this->Database_model->lookupComment($latestComment->CommentID))
         {
             $this->Database_model->insertComment($latestComment);
-                    
-            if($latestComment->FirstName != NULL && $latestComment->LastName != NULL )
-            {
-                $latestComment->Name = $latestComment->FirstName." ".$latestComment->LastName;
-            }
-            else
-            {
-                $latestComment->Name = $latestComment->Email;
-            }
         
-            if($latestComment->Body === 'New ticket submitted (email)')
-            {
-                
-                $latestComment->Preview = 'submitted a new ticket #'.$latestComment->IssueID;
-                
-            } 
-            elseif($latestComment->Body == 'The ticket has been taken')
-            {
-                
-                $latestComment->Preview = 'took over ticket #'.$latestComment->IssueID;
-                
-            } 
-            elseif(strpos($latestComment->Body, 'The ticket has been re-opened'))
-            {
-                
-                $latestComment->Preview = 're-opened ticket #'.$latestComment->IssueID;
-                
-            } 
-            elseif($latestComment->Body == 'The ticket has been closed')
-            {
-                
-                $latestComment->Preview = 'closed ticket #'.$latestComment->IssueID;
-                
-            } 
-            elseif(strpos($latestComment->Body, 'ticket has been assigned to technician:'))
-            {
-                
-                $subjectSplit = explode(":", $latestComment->Body);
-                $latestComment->Preview = 'assigned ticket '.$latestComment->IssueID.' to '.$subjectSplit[1];
-                
-            }
-            else
-            {
-                $latestComment->Preview = 'replied to ticket #'.$latestComment->IssueID;
-            }
+            $latestComment->Name = $this->prepare->notificationName($latestComment);
+        
+            $latestComment->Preview = $this->prepare->notificationPreview($latestComment->Body, $latestComment->IssueID);
+        
+            $latestComment->Date = date('h:iA', unixToPhp($latestComment->CommentDate));
             
             
             $this->pusher->trigger(
                 'tix',
-                'comments',
+                'comments2',
                 $latestComment
             );
             

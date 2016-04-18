@@ -11,6 +11,19 @@ class Database_model extends CI_Model {
     }
     
     /**
+     * Returns Tech Data (array) when id is passed
+     * @access public
+     * @param $pid int
+     * @return array
+     */
+    public function lookupTech($id)
+    {
+        $query = $this->db->get_where('techs', array('helpdesk_id'=>$id));
+        
+        return $query->row();
+    }    
+    
+    /**
      * Returns School Data (array) when personid is passed
      * @access public
      * @param $pid int

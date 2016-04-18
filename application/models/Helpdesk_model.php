@@ -68,7 +68,41 @@ class Helpdesk_model extends CI_Model {
         return json_decode($response);
     }
     
-    
+    public function getTicketsByCategory($categories)
+    {
+        
+        $openTickets = [];
+        
+        foreach($categories as $category)
+        {
+            $curl = curl_init();
+
+            curl_setopt_array($curl, array(
+              CURLOPT_URL => "http://clockworks.ca/support/helpdesk/api/tickets?mode=unclosed&categoryid=$category&count=100",
+              CURLOPT_RETURNTRANSFER => true,
+              CURLOPT_ENCODING => "",
+              CURLOPT_MAXREDIRS => 10,
+              CURLOPT_TIMEOUT => 30,
+              CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+              CURLOPT_CUSTOMREQUEST => "GET",
+              CURLOPT_HTTPHEADER => array(
+                "authorization: Basic ZmhhZDpIb3RtYWlsMTIzNA==",
+                "cache-control: no-cache",
+                "postman-token: 3201605d-a223-2a8a-0dae-e84143fa828e"
+              ),
+            ));
+
+            $response = curl_exec($curl);
+            $err = curl_error($curl);
+
+            curl_close($curl);
+            
+            $openTickets = array_merge($openTickets, json_decode($response));
+        }
+        
+        return $openTickets;
+
+    }
     
     public function getComments($issueID)
     {

@@ -29,7 +29,21 @@ function mysqlDateTimeFirst($unixDate){
     
 }
 
+function unixToPhp($unixDate){
+    
+    
+    date_default_timezone_set('etc/GMT');
+    
+    preg_match( "#/Date\((\d{10})\d{3}(.*?)\)/#", $unixDate, $match );
+    $date = strtotime(date( "Y-m-d H:i:s", $match[1] ));
+    
+    return $date;
+    
+}
+
 function daysFromToday($issueDate){
+    
+    
     
     $today = time();
     $date = strtotime($issueDate);

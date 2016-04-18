@@ -76,7 +76,7 @@ class Clockwork_model extends CI_Model {
          * Get list of clients' personids and expiry dates from ClockWork Database *
          ***************************************************************************/
         
-        $sql = "select * from licensinginternal_productlicense where licensetypeid = 5";
+        $sql = "select * from licensinginternal_productlicense where licensetypeid = 5 order by expirydate";
         $stmt = sqlsrv_query($this->conn, $sql);
         while($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)){$data[] = $row;}
         
