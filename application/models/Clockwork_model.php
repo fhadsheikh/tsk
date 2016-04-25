@@ -88,7 +88,7 @@ class Clockwork_model extends CI_Model {
         $today = strtotime(date('Y-m-d'));
         // var $future timestamp. Any expiry between $today and $future is expiring soon
         $expiringSoonMonths = $this->config->item('expiringSoonMonths');
-        $future = strtotime('+'.$expiringSoonMonths.' month');
+        $future = strtotime('+'.$expiringSoonMonths.' weeks');
         // var $i & $ii, incrementals to set as array keys. For JSON.
         $i = 0;
         $ii = 0;

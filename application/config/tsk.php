@@ -19,4 +19,4 @@ $config['tsk_database'] = array(
     'PWD' => 'techno03'
 );
 
-$config['expiringSoonMonths'] = 1;
+$config['expiringSoonMonths'] = 2;

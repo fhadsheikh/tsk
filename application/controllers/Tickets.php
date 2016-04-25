@@ -25,4 +25,18 @@ class Tickets extends REST_Controller {
         $this->response($response,200);
     }
     
+    public function ticket_get()
+    {
+        $issueID = $this->get('issueID');
+        $ticket = $this->Helpdesk_model->getTicket($issueID);
+        $this->response($ticket, 200);
+    }
+    
+    public function comments_get()
+    {
+        $issueID = $this->get('issueID');
+        $comments = $this->Helpdesk_model->getComments($issueID);
+        $this->response($comments,200);
+    }
+    
 }

@@ -58,7 +58,7 @@ class Prepare {
             $preview = 'replied to ticket #'.$latestCommentIssueID;
         }
         
-        return $preview;
+        return substr($preview,0,50);
     }
     
     public function notificationName($latestComment)
@@ -80,24 +80,19 @@ class Prepare {
         foreach($tickets as $key => $ticket)
         {
             
+            // Issue ID
             $response[$key]['issueId'] = $ticket->IssueID;
-            $response[$key]['title'] = $ticket->Subject;
             
-            $response[$key]['details'][0]['label'] = 'Status';
-            $response[$key]['details'][0]['stat'] = $ticket->Status;
+            // title
+            $response[$key]['subject'] = $ticket->Subject;
             
-            $response[$key]['details'][1]['label'] = 'Priority';
-            $response[$key]['details'][1]['stat'] = lookupPriority($ticket->Priority);
+            // status
+            $response[$key]['status'] = $ticket->Status;
             
-            $response[$key]['details'][2]['label'] = 'Assigned To';
-            $tech = $this->CI->Database_model->lookupTech($ticket->AssignedToUserID);
-            if($tech)
-            {
-                $response[$key]['details'][2]['stat'] = $tech->name;
-            } else {
-                $response[$key]['details'][2]['stat'] = 'Unassigned';
-            }
+            // priority
+            $response[$key]['priority'] = lookupPriority($ticket->Priority);
             
+            // assigned to
             $tech = $this->CI->Database_model->lookupTech($ticket->AssignedToUserID);
             if($tech)
             {
@@ -106,14 +101,13 @@ class Prepare {
                 $response[$key]['assignedTo'] = 'Unassigned';
             }
             
-            $response[$key]['details'][3]['label'] = 'Client';
-            $response[$key]['details'][3]['stat'] = $ticket->CompanyName;
+            // client
+            $response[$key]['client'] = $ticket->CompanyName;
             
-            $response[$key]['details'][4]['label'] = 'Last Updated';
-            $response[$key]['details'][4]['stat'] = date('F d - h:ia', unixToPhp($ticket->LastUpdated));
+            // last updated
+            $response[$key]['lastUpdated'] = date('F d - h:ia', unixToPhp($ticket->LastUpdated));
             
-            $response[$key]['details'][5]['label'] = 'Issue Date';
-            $response[$key]['details'][5]['stat'] = date('F d - h:ia', unixToPhp($ticket->IssueDate));
+            $response[$key]['issueDate'] = date('F d - h:ia', unixToPhp($ticket->IssueDate));
             
             if($ticket->UpdatedByUser)
             {

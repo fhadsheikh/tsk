@@ -68,7 +68,7 @@ class Helpdesk_model extends CI_Model {
         return json_decode($response);
     }
     
-    public function getTicketsByCategory($categories)
+    public function getTicketsByCategory($categories, $count = 100)
     {
         
         $openTickets = [];
@@ -78,7 +78,7 @@ class Helpdesk_model extends CI_Model {
             $curl = curl_init();
 
             curl_setopt_array($curl, array(
-              CURLOPT_URL => "http://clockworks.ca/support/helpdesk/api/tickets?mode=unclosed&categoryid=$category&count=100",
+              CURLOPT_URL => "http://clockworks.ca/support/helpdesk/api/tickets?mode=unclosed&categoryid=$category&count=$count",
               CURLOPT_RETURNTRANSFER => true,
               CURLOPT_ENCODING => "",
               CURLOPT_MAXREDIRS => 10,
@@ -102,6 +102,37 @@ class Helpdesk_model extends CI_Model {
         
         return $openTickets;
 
+    }
+    
+    public function getTicket($issueID)
+    {
+        
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+          CURLOPT_URL => "http://clockworks.ca/support/helpdesk/api/ticket?id=".$issueID,
+          CURLOPT_RETURNTRANSFER => true,
+          CURLOPT_ENCODING => "",
+          CURLOPT_MAXREDIRS => 10,
+          CURLOPT_TIMEOUT => 30,
+          CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+          CURLOPT_CUSTOMREQUEST => "GET",
+          CURLOPT_POSTFIELDS => "-----011000010111000001101001\r\nContent-Disposition: form-data; name=\"categoryId\"\r\n\r\n3\r\n-----011000010111000001101001\r\nContent-Disposition: form-data; name=\"body\"\r\n\r\nTest body\r\n-----011000010111000001101001\r\nContent-Disposition: form-data; name=\"subject\"\r\n\r\ntest subject\r\n-----011000010111000001101001\r\nContent-Disposition: form-data; name=\"priorityId\"\r\n\r\n1\r\n-----011000010111000001101001\r\nContent-Disposition: form-data; name=\"\"\r\n\r\n\r\n-----011000010111000001101001--",
+          CURLOPT_HTTPHEADER => array(
+            "authorization: Basic ZmhhZDpIb3RtYWlsMTIzNA==",
+            "cache-control: no-cache",
+            "content-type: multipart/form-data; boundary=---011000010111000001101001",
+            "id: 8780",
+            "postman-token: 8751c119-fbf1-7b28-deb6-77a8b1fd7b02"
+          ),
+        ));
+
+        $response = curl_exec($curl);
+        $err = curl_error($curl);
+
+        curl_close($curl);
+        
+        return json_decode($response);
     }
     
     public function getComments($issueID)
