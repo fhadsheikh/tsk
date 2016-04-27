@@ -143,7 +143,7 @@ class Tv extends REST_Controller {
      */
     public function comments_get()
     {
-        
+        /*
         $this->load->library('Prepare');
         $latestTicket = $this->Helpdesk_model->getTickets2(1);
         
@@ -171,7 +171,7 @@ class Tv extends REST_Controller {
         }
         
         $this->response($latestComment,200);
-        
+        */
     }
     
     

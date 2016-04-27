@@ -19,4 +19,12 @@ $config['tsk_database'] = array(
     'PWD' => 'techno03'
 );
 
+$config['cw_database'] = array(
+    'ServerName' => 'stableclockwork',
+    'Port' => 1434,
+    'Database' => 'ClockWork5-15-1-21',
+    'UID' => 'tsk',
+    'PWD' => 'techno@07'
+);
+
 $config['expiringSoonMonths'] = 2;
