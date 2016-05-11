@@ -10,11 +10,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Clockwork_model extends CI_Model {
 
     /**
-     * Will store the connection string to connect to MSSQL
+     * Will store the production connection string to connect to MSSQL
      *
      * @var string
      */
-    private $conn;
+    private $prod_conn;
+    
+    /**
+     * Will store the dev connection string to connect to MSSQL
+     *
+     * @var string
+     */
+    private $dev_conn;
     
     /**
      * Constructor for ClockWork Model
@@ -28,6 +35,8 @@ class Clockwork_model extends CI_Model {
     public function __construct($config = 'tsk')
     {
         parent::__construct();
+        
+        
         
         // Load the tsk.php configuration file
         $this->load->config($config);
@@ -62,7 +71,38 @@ class Clockwork_model extends CI_Model {
          * Store sql connect funtion to private $conn var
          * Other functions can pass $conn along with sql queries to get results
          */
-        $this->conn = sqlsrv_connect($serverName, $connectionInfo);
+        $this->prod_conn = sqlsrv_connect($serverName, $connectionInfo);
+        
+        
+                
+        /**
+         * Contains Database Settings from Config file
+         * @var array
+         */
+        $databaseSettingsDev = $this->config->item('cw_database');
+        
+        /**
+         * Contains servername and port seperated by a comma
+         * @var string
+         */
+        $serverNameDev = $databaseSettingsDev['ServerName'].', '.$databaseSettingsDev['Port'];
+        
+        /**
+         * Contains Connection Information
+         * @var array
+         */
+        $connectionInfoDev = array(
+            "Database" => $databaseSettingsDev['Database'],
+            "UID" => $databaseSettingsDev['UID'],
+            "PWD" => $databaseSettingsDev['PWD']
+        );
+        
+        /**
+         * Store sql connect funtion to private $conn var
+         * Other functions can pass $conn along with sql queries to get results
+         */
+        
+        $this->dev_conn = sqlsrv_connect($serverNameDev, $connectionInfoDev);
     }
     
     /*
@@ -77,7 +117,7 @@ class Clockwork_model extends CI_Model {
          ***************************************************************************/
         
         $sql = "select * from licensinginternal_productlicense where licensetypeid = 5 order by expirydate";
-        $stmt = sqlsrv_query($this->conn, $sql);
+        $stmt = sqlsrv_query($this->prod_conn, $sql);
         while($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)){$data[] = $row;}
         
         /*************************************************************************
@@ -110,4 +150,37 @@ class Clockwork_model extends CI_Model {
         return $schools;
     }
     
+    
+    public function insertComment($comment)
+    {
+
+        
+        $sql = "EXEC tsk_AppointmentFromTicket
+		@personid = '".$comment['personid']."',
+		@appointmenttype = '".$comment['appointmenttype']."',
+		@metwithpersonid = '".$comment['metwithpersonid']."',
+		@groupcode = '".$comment['groupcode']."',
+		@screennum = '".$comment['screennum']."',
+		@author = '".$comment['author']."',
+		@responseBody = '".$comment['responseBody']."',
+		@ticketID = '".$comment['ticketID']."',
+		@subject = '".$comment['subject']."',
+		@priority = '".$comment['priority']."',
+		@category = '".$comment['category']."',
+		@submissionDate = '".$comment['submissionDate']."',
+		@submittedBy = '".$comment['submittedBy']."',
+		@ticketBody = '".$comment['ticketBody']."',
+		@techsOnly = '".$comment['techsOnly']."',
+		@recipients = '".$comment['recipients']."',
+		@responseDate = '".$comment['responseDate']."',
+		@commentID = '".$comment['commentID']."'";
+
+        echo $sql;
+        $stmt = sqlsrv_query($this->dev_conn, $sql);
+        
+        if( $stmt === false ) {
+             die( print_r( sqlsrv_errors(), true));
+        }
+        
+    }
 }

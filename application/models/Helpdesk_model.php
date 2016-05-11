@@ -104,6 +104,33 @@ class Helpdesk_model extends CI_Model {
 
     }
     
+    public function getTicketsBySchool($id)
+    {
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+          CURLOPT_URL => "http://clockworks.ca/support/helpdesk/api/tickets?fromCompanyId=10&count=300",
+          CURLOPT_RETURNTRANSFER => true,
+          CURLOPT_ENCODING => "",
+          CURLOPT_MAXREDIRS => 10,
+          CURLOPT_TIMEOUT => 30,
+          CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+          CURLOPT_CUSTOMREQUEST => "GET",
+          CURLOPT_HTTPHEADER => array(
+            "authorization: Basic ZmhhZDpIb3RtYWlsMTIzNA==",
+            "cache-control: no-cache",
+            "postman-token: d4b6d141-df71-5cbd-b91e-76f4c3f1a78f"
+          ),
+        ));
+
+        $response = curl_exec($curl);
+        $err = curl_error($curl);
+
+        curl_close($curl);
+    
+        return json_decode($response);
+    }
+    
     public function getTicket($issueID)
     {
         
@@ -133,6 +160,24 @@ class Helpdesk_model extends CI_Model {
         curl_close($curl);
         
         return json_decode($response);
+    }
+    
+    public function getTicketsDateRange($days = 1)
+    {
+        
+        $daysAgo = mktime(0, 0, 0, date("m"), date("d")-$days,   date("Y"));
+                
+        foreach($this->tickets as $ticket)
+        {
+            $lastUpdated = unixToPhp($ticket->LastUpdated);
+            
+            if($lastUpdated >= $daysAgo)
+            {
+                $response[] = $ticket;
+            }
+        }
+        
+        return $response;
     }
     
     public function getComments($issueID)
@@ -448,6 +493,34 @@ class Helpdesk_model extends CI_Model {
         $pending = count(json_decode($response));
         
         return array("approved"=>$approved, "pending"=>$pending);
+    }
+    
+    public function getUserByEmail($email)
+    {
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+          CURLOPT_URL => "http://clockworks.ca/support/helpdesk/api/userbyemail?email=$email",
+          CURLOPT_RETURNTRANSFER => true,
+          CURLOPT_ENCODING => "",
+          CURLOPT_MAXREDIRS => 10,
+          CURLOPT_TIMEOUT => 30,
+          CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+          CURLOPT_CUSTOMREQUEST => "GET",
+          CURLOPT_HTTPHEADER => array(
+            "authorization: Basic ZmhhZDpIb3RtYWlsMTIzNA==",
+            "cache-control: no-cache",
+            "postman-token: 570e22bc-3715-e8a2-b940-0d3f0523c134"
+          ),
+        ));
+
+        $response = curl_exec($curl);
+        $err = curl_error($curl);
+
+        curl_close($curl);
+        
+        return json_decode($response);
+
     }
     
 }
