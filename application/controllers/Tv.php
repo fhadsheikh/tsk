@@ -108,26 +108,26 @@ class Tv extends REST_Controller {
         }
         
         // For each Expiring school, get school name and format expiry date
-        foreach($data['expiring'] as $key => $expiring)
-        {
-            // Get array of school data from TSK database
-            $school = $this->Database_model->lookupClient($expiring['personid']);
-            
-            // Only build array for schools that are not marked as hidden
-            if(!$school->hide){
-                
-                $expiringClients[$key]['name'] = $school->name;
-                $expiringClients[$key]['date'] = date('F j, Y', $expiring['date']);
-            }
-        }
+//        foreach($data['expiring'] as $key => $expiring)
+//        {
+//            // Get array of school data from TSK database
+//            $school = $this->Database_model->lookupClient($expiring['personid']);
+//            
+//            // Only build array for schools that are not marked as hidden
+//            if(!$school->hide){
+//                
+//                $expiringClients[$key]['name'] = $school->name;
+//                $expiringClients[$key]['date'] = date('F j, Y', $expiring['date']);
+//            }
+//        }
         
         // Push to tix app
         $this->pusher->trigger(
             'tix',
             'support',
             array(
-            'expiredClients' => $expiredClients,
-            'expiringClients' => $expiringClients
+            'expiredClients' => $expiredClients
+//            'expiringClients' => $expiringClients
             )
         );
         

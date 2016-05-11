@@ -131,6 +131,12 @@ class Database_model extends CI_Model {
        $this->db->delete('users_pending', array('helpdesk_id'=>$id));
     }
     
+    public function lookupCompany($companyID)
+    {
+        $query = $this->db->get_where('companies', array('id'=>$companyID));
+        return $query->row();
+    }
+    
     /**
      * Returns Comment Data (array) when commentid is passed
      * @access public

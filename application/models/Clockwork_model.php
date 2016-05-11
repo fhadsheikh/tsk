@@ -151,30 +151,31 @@ class Clockwork_model extends CI_Model {
     }
     
     
-    public function insertComment($personid, $appointmenttype, $metwithpersonid, $groupcode, $screennum, $author, $responseBody, $ticketID,$subject,$priority,$category,$submissionDate,$submittedBy,$ticketBody,$techsOnly,$recepients,$responseDate,$commentID)
+    public function insertComment($comment)
     {
 
         
         $sql = "EXEC tsk_AppointmentFromTicket
-		@personid = '".$personid."',
-		@appointmenttype = '".$appointmenttype."',
-		@metwithpersonid = '".$metwithpersonid."',
-		@groupcode = '".$groupcode."',
-		@screennum = '".$screennum."',
-		@author = '".$author."',
-		@responseBody = '".$responseBody."',
-		@ticketID = '".$ticketID."',
-		@subject = '".$subject."',
-		@priority = '".$priority."',
-		@category = '".$category."',
-		@submissionDate = '".$submissionDate."',
-		@submittedBy = '".$submittedBy."',
-		@ticketBody = '".$ticketBody."',
-		@techsOnly = '".$techsOnly."',
-		@recepients = '".$recepients."',
-		@responseDate = '".$responseDate."',
-		@commentID = '".$commentID."'";
+		@personid = '".$comment['personid']."',
+		@appointmenttype = '".$comment['appointmenttype']."',
+		@metwithpersonid = '".$comment['metwithpersonid']."',
+		@groupcode = '".$comment['groupcode']."',
+		@screennum = '".$comment['screennum']."',
+		@author = '".$comment['author']."',
+		@responseBody = '".$comment['responseBody']."',
+		@ticketID = '".$comment['ticketID']."',
+		@subject = '".$comment['subject']."',
+		@priority = '".$comment['priority']."',
+		@category = '".$comment['category']."',
+		@submissionDate = '".$comment['submissionDate']."',
+		@submittedBy = '".$comment['submittedBy']."',
+		@ticketBody = '".$comment['ticketBody']."',
+		@techsOnly = '".$comment['techsOnly']."',
+		@recipients = '".$comment['recipients']."',
+		@responseDate = '".$comment['responseDate']."',
+		@commentID = '".$comment['commentID']."'";
 
+        echo $sql;
         $stmt = sqlsrv_query($this->dev_conn, $sql);
         
         if( $stmt === false ) {

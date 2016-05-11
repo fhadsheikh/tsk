@@ -20,6 +20,7 @@ class Syncs extends REST_Controller {
         $this->load->model('Database_model');
         $this->load->model('ClockWork_model');
         $this->load->helper('MY_date_helper');
+        $this->load->helper('html2text_helper');
         $this->load->library('Prepare');
     }
     
@@ -31,48 +32,65 @@ class Syncs extends REST_Controller {
     public function master_get()
     {
         // Get latest tickets
-        $tickets = $this->Helpdesk_model->getTicketsDateRange(0);
+//        $tickets = $this->Helpdesk_model->getTicketsDateRange(0);
+        $tickets = $this->Helpdesk_model->getTicketsBySchool(10);
         
         foreach($tickets as $key => $ticket)
         {
             // Get comments for latest tickets
             $comments = $this->Helpdesk_model->getComments($ticket->IssueID);
             
+            $ticketDetails = $this->Helpdesk_model->getTicket($ticket->IssueID);
+            
             foreach($comments as $key2 => $comment)
             {
-                // check if comment doesn't already exist in database
-                if(!$this->Database_model->lookupComment($comment->CommentID))
-                {
                     
-                    // Check if author doesn't exists in tsk database
-                    if(!$this->Database_model->lookupUser($comment->UserID))
+                $author = $this->Database_model->lookupUser($comment->UserID);
+
+                // Check if author doesn't exists in tsk database
+                if(!$author)
+                {
+                    // Check if author is not already in the pending list
+                    if(!$this->Database_model->lookupPendingUser($comment->Email))
                     {
-                        // Check if author is not already in the pending list
-                        if(!$this->Database_model->lookupPendingUser($comment->Email))
+                        if($comment->Email != null)
                         {
-                            if($comment->Email != null)
-                            {
-                                $this->Database_model->insertPendingUser($comment->UserID,$comment->Email);
-                            }
+                            $this->Database_model->insertPendingUser($comment->UserID,$comment->Email);
                         }
                     }
-                    else 
+                }
+                else 
+                {
+                    // Person Id
+//                    $response['personid'] = $this->Database_model->lookupCompany($ticket->CompanyID)->clockwork_id;
+                    $response['personid'] = 5244;
+                    $response['appointmenttype'] = '115';
+//                    $response['metwithpersonid'] = $this->Database_model->lookupCompany($ticket->CompanyID)->clockwork_id;
+                    $response['metwithpersonid'] = 2765;
+                    $response['groupcode'] = '102'.$ticket->IssueID;
+                    $response['screennum'] = '105';
+                    $response['author'] = $this->prepare->notificationName($comment);
+                    $response['responseBody'] = str_replace("'", "", strip_tags(convert_html_to_text($comment->Body)));
+                    $response['ticketID'] = $ticket->IssueID;
+                    $response['subject'] = $ticket->Subject;
+                    $response['priority'] = $ticket->Priority;
+                    $response['category'] = $ticket->CategoryID;
+                    $response['submissionDate'] = date('Y-m-d', unixToPhp($ticket->IssueDate));
+                    $response['submittedBy'] = $this->prepare->notificationName($comment);
+                    $response['ticketBody'] = str_replace("'", "", strip_tags(convert_html_to_text($ticketDetails->Body)));
+                    $response['techsOnly'] = $comment->ForTechsOnly;
+                    if($comment->Recipients == null)
                     {
-                        
-                        // Insert into clockwork
-                        $response[$key]['Author'] = $this->prepare->notificationName($comment);
-                        $response[$key]['ResponseBody'] = $comment->Body;
-
-                        $response[$key]['Subject'] = $ticket->Subject;
-                        $response[$key]['Priority'] = $ticket->Priority;
-                        $response[$key]['Category'] = $ticket->CategoryID;
-                        $response[$key]['SubmissionDate'] = date('Y-m-d', unixToPhp($ticket->IssueDate));
-                        $response[$key]['SubmittedBy'] = $this->prepare->notificationName($comment);
-
-                        //$this->Database_model->insertComment($comment);
+                        $response['recipients'] = 'No Recipients';
+                    } else 
+                    {
+                        $response['recipients'] = $comment->Recipients;                        
                     }
-                    
-                    
+                    $response['responseDate'] = date('m/d/Y h:i a', unixToPhp($comment->CommentDate));
+                    $response['commentID'] = '3'.$comment->CommentID;
+//                    $response['commentID'] = rand();
+//                    print_r($response);
+                    $this->ClockWork_model->insertComment($response);
                 }
             }
             
@@ -100,33 +118,6 @@ class Syncs extends REST_Controller {
         }
         
         $this->response($pendingUsers, 200);
-    }
-    
-    public function test_get()
-    {
-        $personid = '5244';
-		$appointmenttype = '115';
-		$metwithpersonid = '680';
-		$groupcode = '9995';
-		$screennum = '105';
-		$author = 'Ticket Sync';
-		$responseBody = 'This ticket was assigned to Shia Labeouf';
-		$ticketID = '9048';
-		$subject = 'Who let the dogs out AGAIN?';
-		$priority = 'Critical';
-		$category = 'Inquiry';
-		$submissionDate = '4/26/2016 2:00 pm';
-		$submittedBy = 'Shia Labeouf';
-		$ticketBody = 'Seriously, who did it? Who let the dogs out?';
-		$techsOnly = '1';
-		$recepients = 'shia@clockworks.ca,azim@clockworks.ca';
-		$responseDate = '4/26/2016 9:40 am';
-		$commentID = 'sad face10';
-        
-        
-        $this->ClockWork_model->insertComment($personid, $appointmenttype, $metwithpersonid, $groupcode, $screennum, $author, $responseBody, $ticketID,$subject,$priority,$category,$submissionDate,$submittedBy,$ticketBody,$techsOnly,$recepients,$responseDate,$commentID);
-            
-        
     }
     
 }
