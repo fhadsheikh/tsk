@@ -15,6 +15,7 @@ class Clockwork_model extends CI_Model {
      * @var string
      */
     private $prod_conn;
+    private $prod_conn2;
     
     /**
      * Will store the dev connection string to connect to MSSQL
@@ -71,8 +72,8 @@ class Clockwork_model extends CI_Model {
          * Store sql connect funtion to private $conn var
          * Other functions can pass $conn along with sql queries to get results
          */
-        $this->prod_conn = sqlsrv_connect($serverName, $connectionInfo);
-        
+        //$this->prod_conn = sqlsrv_connect($serverName, $connectionInfo);
+        $this->prod_conn2 = new PDO('odbc:Driver=FreeTDS; Server=192.168.1.44; Port=1434; Database=ClockWorkTechno; UID=tp; PWD=techno03;');
         
                 
         /**
@@ -102,7 +103,7 @@ class Clockwork_model extends CI_Model {
          * Other functions can pass $conn along with sql queries to get results
          */
         
-        $this->dev_conn = sqlsrv_connect($serverNameDev, $connectionInfoDev);
+        //$this->dev_conn = sqlsrv_connect($serverNameDev, $connectionInfoDev);
     }
     
     /*
@@ -117,8 +118,20 @@ class Clockwork_model extends CI_Model {
          ***************************************************************************/
         
         $sql = "select * from licensinginternal_productlicense where licensetypeid = 5 order by expirydate";
-        $stmt = sqlsrv_query($this->prod_conn, $sql);
-        while($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)){$data[] = $row;}
+//        $stmt = sqlsrv_query($this->prod_conn, $sql);
+//        while($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)){$data[] = $row;}
+        
+        $statement = $this->prod_conn2->prepare($sql);
+        $statement->bindValue(1, 'Value', PDO::PARAM_STR);
+        $statement->execute();
+        $result = $statement->fetchAll(PDO::FETCH_ASSOC);
+        
+        foreach($result as $res)
+        {
+            $data[] = $res;
+        }
+    
+        
         
         /*************************************************************************
          * Filter only schools who's support is already expired or expiring soon *
@@ -132,21 +145,24 @@ class Clockwork_model extends CI_Model {
         // var $i & $ii, incrementals to set as array keys. For JSON.
         $i = 0;
         $ii = 0;
+
         
         // Prepare outgoing arrays. For each client, set personid and expiry date
         foreach($data as $key => $client)
         {
-            if($client['expirydate']->getTimestamp() < $today)
+            if(strtotime($client['expirydate']) < $today)
             {
                 $schools['expired'][$i]['personid'] = $client['personid'];
-                $schools['expired'][$i]['date'] = $client['expirydate']->getTimestamp();
+                $schools['expired'][$i]['date'] = strtotime($client['expirydate']);
                 $i++;
-            } else if ($client['expirydate']->getTimestamp() > $today && $client['expirydate']->getTimestamp() < $future){
+            } else if (strtotime($client['expirydate']) > $today && strtotime($client['expirydate']) < $future){
                 $schools['expiring'][$ii]['personid'] = $client['personid'];
-                $schools['expiring'][$ii]['date'] = $client['expirydate']->getTimestamp();
+                $schools['expiring'][$ii]['date'] = strtotime($client['expirydate']);
                 $ii++;
             }
+
         }
+        
         return $schools;
     }
     

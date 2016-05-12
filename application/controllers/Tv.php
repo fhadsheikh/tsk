@@ -14,13 +14,10 @@ class Tv extends REST_Controller {
     public function __construct()
     {
         parent::__construct();
+        
         $this->load->library('pusher');
         $this->load->model('Clockwork_model');
         $this->load->model('Database_model');
-        $this->load->model('Helpdesk_model');
-        $this->load->helper('My_date_helper');
-        
-       header("Access-Control-Allow-Origin: *");
         
     }
     
@@ -32,6 +29,8 @@ class Tv extends REST_Controller {
      */
     public function techs_get()
     {
+        
+        $this->load->model('Helpdesk_model');
         $data = $this->Helpdesk_model->getTechStats();
         
         $this->pusher->trigger(
@@ -52,6 +51,7 @@ class Tv extends REST_Controller {
     public function tickets_get()
     {
         
+        $this->load->model('Helpdesk_model');
         // OPEN
         $data['open'] = $this->Helpdesk_model->getOpenTickets();
         
@@ -131,7 +131,7 @@ class Tv extends REST_Controller {
             )
         );
         
-        $this->response($data, 200);
+        $this->response($expiredClients, 200);
         
     }
    
