@@ -2,6 +2,7 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+
 function mysqlDate($unixDate){
     
     date_default_timezone_set('etc/GMT');
