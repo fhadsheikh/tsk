@@ -174,6 +174,29 @@ class Tv extends REST_Controller {
         */
     }
     
+    /**
+     * API ENDPOINT - GET /tv/newsletter
+     * @access public
+     * @return push array containing newsletter membership count
+     * @return 200
+     */
+    public function newsletter_get()
+    {
+        $this->load->model('Newsletter_model');
+        
+        $memberCount = $this->Newsletter_model->getSubscriberCount();
+        
+        //Push to tix app
+        $this->pusher->trigger(
+            'tix',
+            'newsletter',
+            array(
+                'count' => $memberCount
+            )
+        );
+        
+        $this->response(200);
+    }
     
 }
     
