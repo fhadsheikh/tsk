@@ -341,10 +341,6 @@ class Helpdesk_model extends CI_Model {
                 "id"=>468
             ),
             array(
-                "name"=>"Jenny Wang",
-                "id"=>1054
-            ),
-            array(
                 "name"=>"Elisa Lo Monaco",
                 "id"=>1141
             ));
