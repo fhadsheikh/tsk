@@ -214,7 +214,7 @@ class Helpdesk_model extends CI_Model {
         $open = 0;
         foreach($this->tickets as $ticket)
         {
-            if($ticket->Status != 'Resolved' && ($ticket->CategoryID == 3 || $ticket->CategoryID == 14))
+            if($ticket->Status != 'Resolved' && $ticket->CategoryID == 14)
             {
                 $open++;
             }
@@ -347,10 +347,6 @@ class Helpdesk_model extends CI_Model {
             array(
                 "name"=>"Elisa Lo Monaco",
                 "id"=>1141
-            ),
-            array(
-                "name"=>"David Chun",
-                "id"=>1154
             ));
         
         $techCount = array();
