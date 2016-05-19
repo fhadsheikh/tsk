@@ -214,7 +214,7 @@ class Helpdesk_model extends CI_Model {
         $open = 0;
         foreach($this->tickets as $ticket)
         {
-            if($ticket->Status != 'Resolved' && $ticket->CategoryID == 14)
+            if($ticket->Status != 'Resolved' && ($ticket->CategoryID == 14 || $ticket->CategoryID == 3))
             {
                 $open++;
             }
